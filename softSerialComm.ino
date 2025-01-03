@@ -9,8 +9,15 @@ const uint32_t hardSerialBautRate = 115200; // Velocidad del Hardware Serial
 // Configuración del Software Serial
 SoftwareSerial softSerial(softRX, softTX);
 
-uint8_t contador = 0; // Contador de envíos, empieza en 0
-uint8_t datoRecibido = 0; // Para almacenar el dato recibido
+// Definición del struct para manejar datos
+struct DataPacket {
+  uint8_t contador; // Contador de datos
+};
+
+// Variables globales para el struct
+DataPacket dataEnvio = {0}; // Inicializa el contador en 0
+DataPacket dataRecibido = {0}; // Estructura para almacenar datos recibidos
+
 unsigned long timeLine0 = 0; // Variable para controlar el tiempo
 const unsigned long intervalo = 500; // Intervalo entre envíos (en milisegundos)
 
@@ -39,7 +46,7 @@ void setupInit() { // Configuración inicial
   pinMode(softTX, OUTPUT); // Configura el pin TX como salida
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
-  Serial.println(F("Inicialización y Configuración de Pines Completada."));
+  Serial.println(F("Inicialización y configuración de pines completada."));
 }
 void setupSoftSerial() { // Inicialización del Software Serial
   softSerial.begin(softSerialBautRate); // Inicializa SoftwareSerial
@@ -51,27 +58,32 @@ void setupEnd() { // Finalización de la configuración
   digitalWrite(LED_BUILTIN, LOW);
 }
 void sendSoftSerial() { // Enviar datos por Software Serial
-
-  if (millis() >= timeLine0 + intervalo) {
+  
+  if (millis() >= timeLine0 + intervalo) { // Si paso el lapso de tiempo
     
     timeLine0 = millis(); // Actualiza el tiempo anterior
     digitalWrite(LED_BUILTIN, HIGH);
 
-    softSerial.write(contador); // Envía el valor del contador como byte
-    Serial.print(F("Enviado (Binario): ")); Serial.println(contador, BIN);
-    Serial.print(F("Enviado (Decimal): ")); Serial.println(contador, DEC);
-    Serial.print(F("Enviado (Hexadecimal): ")); Serial.println(contador, HEX);
-    Serial.print(F("Enviado (Octal): ")); Serial.println(contador, OCT);
+    // Envía el struct como bytes
+    size_t structSize = sizeof(dataEnvio); // Tamaño del struct en bytes
+    softSerial.write(reinterpret_cast<uint8_t*>(&dataEnvio), structSize);
+
+    // Imprime el valor enviado en diferentes formatos
+    Serial.print(F("Enviado (Binario): ")); Serial.println(dataEnvio.contador, BIN);
+    Serial.print(F("Enviado (Decimal): ")); Serial.println(dataEnvio.contador, DEC);
+    Serial.print(F("Enviado (Hexadecimal): ")); Serial.println(dataEnvio.contador, HEX);
+    Serial.print(F("Enviado (Octal): ")); Serial.println(dataEnvio.contador, OCT);
     Serial.print(F("Enviado (ASCII): "));
-    if (contador >= 32 && contador <= 126) {
-      Serial.println((char)contador); // Imprime carácter ASCII visible
+    if (dataEnvio.contador >= 32 && dataEnvio.contador <= 126) {
+      Serial.println((char)dataEnvio.contador); // Imprime carácter ASCII visible
     } else {
       Serial.println(F("No visible"));
     }
+    Serial.print(F("Bytes enviados: ")); Serial.println(structSize); // Imprime el tamaño del struct
 
-    contador++; // Incrementa el contador
-    if (contador > 255) {
-      contador = 0; // Reinicia si excede 255
+    dataEnvio.contador++; // Incrementa el contador y reinicia si excede 255
+    if (dataEnvio.contador > 255) {
+      dataEnvio.contador = 0; // Reinicia si excede 255
     }
     timeLine0 = millis(); // Actualiza el tiempo anterior
     digitalWrite(LED_BUILTIN, LOW);
@@ -81,20 +93,25 @@ void sendSoftSerial() { // Enviar datos por Software Serial
 
 }
 void readSoftSerial() { // Leer datos recibidos por Software Serial
+  
+  if (softSerial.available() < sizeof(dataRecibido)) return; // Espera hasta recibir el tamaño completo del struct
 
-  if (!softSerial.available()) return; // Salir si no hay datos disponibles
+  // Lee los datos y los almacena en el struct
+  size_t structSize = sizeof(dataRecibido); // Tamaño del struct en bytes
+  softSerial.readBytes(reinterpret_cast<uint8_t*>(&dataRecibido), structSize);
 
-  datoRecibido = softSerial.read(); // Lee el dato recibido
-  Serial.print(F("Recibido (Binario): ")); Serial.println(datoRecibido, BIN);
-  Serial.print(F("Recibido (Decimal): ")); Serial.println(datoRecibido, DEC);
-  Serial.print(F("Recibido (Hexadecimal): ")); Serial.println(datoRecibido, HEX);
-  Serial.print(F("Recibido (Octal): ")); Serial.println(datoRecibido, OCT);
+  // Imprime el valor recibido en diferentes formatos
+  Serial.print(F("Recibido (Binario): ")); Serial.println(dataRecibido.contador, BIN);
+  Serial.print(F("Recibido (Decimal): ")); Serial.println(dataRecibido.contador, DEC);
+  Serial.print(F("Recibido (Hexadecimal): ")); Serial.println(dataRecibido.contador, HEX);
+  Serial.print(F("Recibido (Octal): ")); Serial.println(dataRecibido.contador, OCT);
   Serial.print(F("Recibido (ASCII): "));
-  if (datoRecibido >= 32 && datoRecibido <= 126) {
-    Serial.println((char)datoRecibido); // Imprime carácter ASCII visible
+  if (dataRecibido.contador >= 32 && dataRecibido.contador <= 126) {
+    Serial.println((char)dataRecibido.contador); // Imprime carácter ASCII visible
   } else {
     Serial.println(F("No visible"));
   }
+  Serial.print(F("Bytes recibidos: ")); Serial.println(structSize); // Imprime el tamaño del struct
 
 }
 void handleSoftSerial() { // Manejo del Software Serial (envío y recepción)

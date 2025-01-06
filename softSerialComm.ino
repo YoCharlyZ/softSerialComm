@@ -1,7 +1,7 @@
 #include <SoftwareSerial.h> // Incluye la librería SoftwareSerial
 
 // Define los pines para el SoftwareSerial
-const uint8_t softRX = 0; // Uno PinD4(softRX)   NodeMcu Gpio0 = pinD3(softRX)
+const uint8_t softRX = 4; // Uno PinD4(softRX)   NodeMcu Gpio0 = pinD3(softRX)
 const uint8_t softTX = 2; // Uno PinD2(softTX)   NodeMcu Gpio2 = pinD4(softTX)
 const uint16_t softSerialBautRate = 9600; // Velocidad del Software Serial
 const uint32_t hardSerialBautRate = 115200; // Velocidad del Hardware Serial
@@ -12,7 +12,7 @@ SoftwareSerial softSerial(softRX, softTX);
 //#pragma pack(1) // Definición del struct para manejar datos con directivas globales de empaquetamiento alineado a 1 byte sin relleno.
 // Definición del struct para manejar datos con atributo especifico de empaquetamiento alineado a 1 byte sin relleno.
 struct __attribute__((packed, aligned(1))) DataPacket {
-  uint8_t contador; // Contador de datos
+  uint16_t contador; // Contador de datos
 }; // #pragma pack() // Restaura las directivas globales del empaquetamiento a su propio predeterminado.
 
 // Variables globales para el struct

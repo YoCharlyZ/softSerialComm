@@ -11,7 +11,7 @@ _GRACIAS._
   + __Trabajando :__  
     - [x] Trabajando Comunicacion Software Serial. 
     - [x] Enviar y Recibir 1 Byte = uint8_t.  
-    - [ ] Enviar y Recibir 1 Struct con 1 Byte = uint8_t.  
+    - [x] Enviar y Recibir 1 Struct con 1 Byte = uint8_t.  
     - [ ] Enviar y Recibir 1 Struct con 1 Byte = uint16_t.  
   
   

@@ -12,7 +12,7 @@ SoftwareSerial softSerial(softRX, softTX);
 //#pragma pack(1) // Definición del struct para manejar datos con directivas globales de empaquetamiento alineado a 1 byte sin relleno.
 // Definición del struct para manejar datos con atributo especifico de empaquetamiento alineado a 1 byte sin relleno.
 struct __attribute__((packed, aligned(1))) DataPacket {
-  uint32_t contador; // Contador de datos
+  uint64_t contador; // Contador de datos
 }; // #pragma pack() // Restaura las directivas globales del empaquetamiento a su propio predeterminado.
 
 // Variables globales para el struct

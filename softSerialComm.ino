@@ -12,14 +12,18 @@ SoftwareSerial softSerial(softRX, softTX);
 //#pragma pack(1) // Definición del struct para manejar datos con directivas globales de empaquetamiento alineado a 1 byte sin relleno.
 // Definición del struct para manejar datos con atributo especifico de empaquetamiento alineado a 1 byte sin relleno.
 struct __attribute__((packed, aligned(1))) DataPacket {
-  uint8_t contador8bits;   // Contador de 8 bits
-  uint16_t contador16bits; // Contador de 16 bits
-  uint32_t contador32bits; // Contador de 32 bits
+  uint8_t contador8bits;   // Contador de 8 bits = 1 Byte
+  uint16_t contador16bits; // Contador de 16 bits = 2 Bytes
+  uint32_t contador32bits; // Contador de 32 bits = 4 Bytes
+  char caracter;             // Caracter ASCII = 8 bits = 1 Byte
+  bool estado;               // Estado lógico = 8 bits = 1 Byte
+  float valorFlotante;       // Número de punto flotante 32 bits = 4 Bytes
 }; // #pragma pack() // Restaura las directivas globales del empaquetamiento a su propio predeterminado.
 
 // Variables globales para el struct
-DataPacket dataEnvio = {0, 256, 65536};  // Inicialización explícita
-DataPacket dataRecibido = {0, 0, 0};     // Inicialización explícita
+DataPacket dataEnvio = {0, 256, 65536, 'A', true, 00000.00}; // Inicialización explícita
+DataPacket dataRecibido = {0, 0, 0, ' ', false, 00000.00};   // Inicialización para recepción
+
 
 unsigned long timeLine0 = 0; // Variable para controlar el tiempo
 const unsigned long intervalo = 500; // Intervalo de tiempo en milisegundos
@@ -77,6 +81,9 @@ void sendSoftSerial() { // Enviar datos mediante SoftwareSerial
     Serial.print(F("8 bits: ")); Serial.println(dataEnvio.contador8bits);
     Serial.print(F("16 bits: ")); Serial.println(dataEnvio.contador16bits);
     Serial.print(F("32 bits: ")); Serial.println(dataEnvio.contador32bits);
+    Serial.print(F("Caracter: ")); Serial.println(dataEnvio.caracter);
+    Serial.print(F("Estado (bool): ")); Serial.println(dataEnvio.estado ? "true" : "false");
+    Serial.print(F("Valor Flotante: ")); Serial.println(dataEnvio.valorFlotante);
     Serial.print(F("Bytes Enviados: ")); Serial.println(structSize); // Imprime el tamaño del struct
     Serial.println(F(" "));
 
@@ -84,6 +91,9 @@ void sendSoftSerial() { // Enviar datos mediante SoftwareSerial
     dataEnvio.contador8bits++;
     dataEnvio.contador16bits++;
     dataEnvio.contador32bits++;
+    dataEnvio.caracter = (dataEnvio.caracter >= 'Z') ? 'A' : dataEnvio.caracter + 1; // Rota entre 'A' y 'Z'
+    dataEnvio.estado = !dataEnvio.estado; // Alterna el estado lógico
+    dataEnvio.valorFlotante += 00000.01; // Incrementa ligeramente el valor flotante
 
     digitalWrite(LED_BUILTIN, LOW); // Apaga el LED tras el envío
   }
@@ -99,6 +109,9 @@ void readSoftSerial() { // Leer datos recibidos mediante SoftwareSerial
     Serial.print(F("8 bits: ")); Serial.println(dataRecibido.contador8bits);
     Serial.print(F("16 bits: ")); Serial.println(dataRecibido.contador16bits);
     Serial.print(F("32 bits: ")); Serial.println(dataRecibido.contador32bits);
+    Serial.print(F("Caracter: ")); Serial.println(dataRecibido.caracter);
+    Serial.print(F("Estado (bool): ")); Serial.println(dataRecibido.estado ? "true" : "false");
+    Serial.print(F("Valor Flotante: ")); Serial.println(dataRecibido.valorFlotante);
     Serial.print(F("Bytes Recibidos: ")); Serial.println(structSize); // Imprime el tamaño del struct
     Serial.println(F(" "));
   }

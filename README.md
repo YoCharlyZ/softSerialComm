@@ -15,7 +15,7 @@ _GRACIAS._
     - [x] Enviar y Recibir 1 Struct con 2 Bytes = uint16_t. [V-0.0.3](https://github.com/YoCharlyZ/softSerialComm/tree/7cf0bfdd02d89aa4e187c9cc02cf86e6d8d6c69d)  
     - [x] Enviar y Recibir 1 Struct con 4 Bytes = uint32_t. [V-0.0.4](https://github.com/YoCharlyZ/softSerialComm/tree/c544f7bdef98ba38f00b83f5f4f0e7d0362cb146)  
     - [x] Enviar y Recibir 1 Struct con multiples miembros. [V-0.0.5](https://github.com/YoCharlyZ/softSerialComm/tree/15d5f5c5254ac4e6eac2c732f2015d3620aad8f0)  
-    - [x] Enviar y Recibir 1 Struct con mas cantidad de datos primitivos. [V-0.0.6]()  
+    - [x] Enviar y Recibir 1 Struct con mas cantidad de datos primitivos. [V-0.0.6](https://github.com/YoCharlyZ/softSerialComm/tree/14a7c725aa79f98a9d7cfd7cac1b5d1be97c1671)  
     - [ ] Mejorar la Robustez y Fiabilidad de los Datos. [V-0.0.7]()  
   
   

@@ -17,6 +17,7 @@ _GRACIAS._
     - [x] Enviar y Recibir 1 Struct con multiples miembros. [V-0.0.5](https://github.com/YoCharlyZ/softSerialComm/tree/15d5f5c5254ac4e6eac2c732f2015d3620aad8f0)  
     - [x] Enviar y Recibir 1 Struct con mas cantidad de datos primitivos. [V-0.0.6](https://github.com/YoCharlyZ/softSerialComm/tree/14a7c725aa79f98a9d7cfd7cac1b5d1be97c1671)  
     - [x] Mejorar la Robustez y Fiabilidad de los Datos. [V-0.0.7](https://github.com/YoCharlyZ/softSerialComm/tree/b039c206649030fab34b0191d344d7698cd7c501)  
-    - [ ] Se Implementan Algoritmos para Calcular CheckSum y CRC. [V-0.0.8]()  
-    - [ ] Reservado. [V-0.0.9]()  
+    - [x] Se Implementan Algoritmos para Calcular CheckSum y CRC. [V-0.0.8](https://github.com/YoCharlyZ/softSerialComm/tree/b37bb84ab6d0e6f82e1cb2f73649b44b0c84955d)  
+    - [ ] Implementar un Header con el idRemitente e idDestinatario. [V-0.0.9]()  
+    - [ ] Reservado. [V-0.1.0]()  
   

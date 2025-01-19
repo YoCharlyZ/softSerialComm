@@ -16,7 +16,7 @@ _GRACIAS._
     - [x] Enviar y Recibir 1 Struct con 4 Bytes = uint32_t. [V-0.0.4](https://github.com/YoCharlyZ/softSerialComm/tree/c544f7bdef98ba38f00b83f5f4f0e7d0362cb146)  
     - [x] Enviar y Recibir 1 Struct con multiples miembros. [V-0.0.5](https://github.com/YoCharlyZ/softSerialComm/tree/15d5f5c5254ac4e6eac2c732f2015d3620aad8f0)  
     - [x] Enviar y Recibir 1 Struct con mas cantidad de datos primitivos. [V-0.0.6](https://github.com/YoCharlyZ/softSerialComm/tree/14a7c725aa79f98a9d7cfd7cac1b5d1be97c1671)  
-    - [x] Mejorar la Robustez y Fiabilidad de los Datos. [V-0.0.7](https://github.com/YoCharlyZ/softSerialComm/tree/db9a93f4bcc03fb2c145c14833b5d234cc6d5f78)  
-    - [ ] Aumentar la Robustez y Fiabilidad de los Datos. [V-0.0.8]()  
+    - [x] Mejorar la Robustez y Fiabilidad de los Datos. [V-0.0.7](https://github.com/YoCharlyZ/softSerialComm/tree/b039c206649030fab34b0191d344d7698cd7c501)  
+    - [ ] Se Implementan Algoritmos para Calcular CheckSum y CRC. [V-0.0.8]()  
     - [ ] Reservado. [V-0.0.9]()  
   

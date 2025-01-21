@@ -1,17 +1,23 @@
 #include <SoftwareSerial.h> // Incluye la librería SoftwareSerial
-
 // Define los pines para el SoftwareSerial
-const uint8_t softRX = 4; // Uno PinD4(softRX)   NodeMcu Gpio0 = pinD3(softRX)
-const uint8_t softTX = 2; // Uno PinD2(softTX)   NodeMcu Gpio2 = pinD4(softTX)
+const uint8_t softRX = 4//0; // Uno PinD4(softRX) ||o||  NodeMcu D3gpio0(softRX)
+const uint8_t softTX = 2//2; // Uno PinD2(softTX) ||o||  NodeMcu D4gpio2(softTX)
 const uint16_t softSerialBautRate = 9600; // Velocidad del SoftwareSerial
 const uint32_t hardSerialBautRate = 115200; // Velocidad del Hardware Serial
 const uint8_t targetID = 0; // Un ID especial reservado para algun fin especifico.
-const uint8_t mySlaveID = 8; // Mi ID de Esclavo
-const uint8_t toMasterID = 10; // El ID de al menos un Maestro
+const uint8_t mySlaveID = 8; // Mi ID de Esclavo Uno==8 ||o|| para NodeMcu==10
+const uint8_t toMasterID = 10; // El ID de al menos un Maestro Uno==10 ||o|| para NodeMcu==8
 const uint8_t broadcastID = 255; // Un ID para MultiDifusion
-
+const unsigned long intervalo = 500; // Intervalo de tiempo en milisegundos
+unsigned long timeLine0 = 0; // Variable para controlar el tiempo
 // Configuración del SoftwareSerial
 SoftwareSerial softSerial(softRX, softTX);
+
+// Variables independientes
+char varCharInit = '<';
+uint8_t varContador8bits = 0; uint16_t varContador16bits = 256; uint32_t varContador32bits = 65536;
+char varCaracter = 'A'; bool varEstado = true; float varValorFlotante = 0.00;
+char varCharEnd = '>';
 
 //#pragma pack(1) // Definición del struct para manejar datos con directivas globales de empaquetamiento alineado a 1 byte sin relleno.
 // Definición del struct para manejar datos con atributo especifico de empaquetamiento alineado a 1 byte sin relleno.
@@ -35,15 +41,17 @@ struct __attribute__((packed, aligned(1))) DataPacket {
 DataPacket dataEnvio = {'<', 0, 0, 0, 256, 65536, 'A', true, 0.00, sizeof(DataPacket), 0, 0, '>'}; // Inicialización explícita con caracteres de control
 DataPacket dataRecibido = {'<', 0, 0, 0, 0, 0, ' ', false, 0.00, 0, 0, 0, '>'};   // Inicialización para recepción con caracteres de control
 
-unsigned long timeLine0 = 0; // Variable para controlar el tiempo
-const unsigned long intervalo = 500; // Intervalo de tiempo en milisegundos
-
 // Prototipos de funciones
 void setupInit();
 void setupSoftSerial();
 void setupEnd();
 void calcularChecksum();
 void calcularCRC();
+void printSending();
+void printReceived();
+void prinVarsInternal();
+void updateStruct();
+void updateVars();
 void sendSoftSerial();
 void readSoftSerial();
 void handleSoftSerial();
@@ -81,7 +89,7 @@ void setupEnd() { // Finalización de la configuración
 
 void calcularChecksum(DataPacket* paquete) { // Calcula el checksum y lo almacena directamente en el paquete
   uint8_t suma = 0;
-  uint8_t* ptr = reinterpret_cast<uint8_t*>(paquete); 
+  uint8_t* ptr = reinterpret_cast<uint8_t*>(paquete);
   for (size_t i = 0; i < sizeof(DataPacket) - 3; i++) { // Excluye checksum y CRC
     suma += ptr[i];
   }
@@ -101,57 +109,118 @@ void calcularCRC(DataPacket* paquete) { // Calcula el CRC y lo almacena directam
   paquete->crc = crc; // Actualiza el campo CRC
 }
 
+void printSending() { // Imprime los datos enviados en varios formatos
+  Serial.println(F("Datos enviados:"));
+  Serial.print(F("Inicio: ")); Serial.print(dataEnvio.charInit); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.charInit, HEX); Serial.println(F(")"));
+  Serial.print(F("SourceID: ")); Serial.print(dataEnvio.sourceID); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.sourceID, HEX); Serial.println(F(")"));
+  Serial.print(F("DestinationID: ")); Serial.print(dataEnvio.destinationID); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.destinationID, HEX); Serial.println(F(")"));
+  Serial.print(F("8 bits: ")); Serial.print(dataEnvio.contador8bits); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.contador8bits, HEX); Serial.println(F(")"));
+  Serial.print(F("16 bits: ")); Serial.print(dataEnvio.contador16bits); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.contador16bits, HEX); Serial.println(F(")"));
+  Serial.print(F("32 bits: ")); Serial.print(dataEnvio.contador32bits); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.contador32bits, HEX); Serial.println(F(")"));
+  Serial.print(F("Caracter: ")); Serial.print(dataEnvio.caracter); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.caracter, HEX); Serial.println(F(")"));
+  Serial.print(F("Estado (bool): ")); Serial.print(dataEnvio.estado ? "true" : "false"); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.estado, HEX); Serial.println(F(")"));
+  Serial.print(F("Valor Flotante: ")); Serial.print(dataEnvio.valorFlotante); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.valorFlotante, HEX); Serial.println(F(")"));
+  Serial.print(F("Tamaño del paquete: ")); Serial.print(dataEnvio.structSize); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.structSize, HEX); Serial.println(F(")"));
+  Serial.print(F("CheckSum del paquete: ")); Serial.print(dataEnvio.checksum); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.checksum, HEX); Serial.println(F(")"));
+  Serial.print(F("CRC del paquete: ")); Serial.print(dataEnvio.crc); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.crc, HEX); Serial.println(F(")"));
+  Serial.print(F("Fin: ")); Serial.print(dataEnvio.charEnd); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.charEnd, HEX); Serial.println(F(")"));
+  Serial.println(F(" "));
+}
+
+void printReceived() { // Imprime los datos recibidos en varios formatos
+  Serial.println(F("Datos recibidos:"));
+  Serial.print(F("Inicio: ")); Serial.print(dataRecibido.charInit); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.charInit, HEX); Serial.println(F(")"));
+  Serial.print(F("SourceID: ")); Serial.print(dataRecibido.sourceID);  Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.sourceID, HEX); Serial.println(F(")"));
+  Serial.print(F("DestinationID: ")); Serial.print(dataRecibido.destinationID); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.destinationID, HEX); Serial.println(F(")"));
+  Serial.print(F("8 bits: ")); Serial.print(dataRecibido.contador8bits); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.contador8bits, HEX); Serial.println(F(")"));
+  Serial.print(F("16 bits: ")); Serial.print(dataRecibido.contador16bits); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.contador16bits, HEX); Serial.println(F(")"));
+  Serial.print(F("32 bits: ")); Serial.print(dataRecibido.contador32bits); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.contador32bits, HEX); Serial.println(F(")"));
+  Serial.print(F("Caracter: ")); Serial.print(dataRecibido.caracter); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.caracter, HEX); Serial.println(F(")"));
+  Serial.print(F("Estado (bool): ")); Serial.print(dataRecibido.estado ? "true" : "false"); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.estado, HEX); Serial.println(F(")"));
+  Serial.print(F("Valor Flotante: ")); Serial.print(dataRecibido.valorFlotante); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.valorFlotante, HEX); Serial.println(F(")"));
+  Serial.print(F("Tamaño del paquete: ")); Serial.print(dataRecibido.structSize); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.structSize, HEX); Serial.println(F(")"));
+  Serial.print(F("CheckSum del paquete: ")); Serial.print(dataRecibido.checksum); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.checksum, HEX); Serial.println(F(")"));
+  Serial.print(F("CRC del paquete: ")); Serial.print(dataRecibido.crc); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.crc, HEX); Serial.println(F(")"));
+  Serial.print(F("Fin: ")); Serial.print(dataRecibido.charEnd); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.charEnd, HEX); Serial.println(F(")"));
+  Serial.println(F(" "));
+}
+
+void printVarsInternal() { // Imprime los datos de las variables intenas en varios formatos
+  Serial.println(F("Datos de Variables Internas:"));
+  Serial.print(varCharInit);
+  Serial.print(varContador8bits); Serial.print(F(", "));
+  Serial.print(varContador16bits); Serial.print(F(", "));
+  Serial.print(varContador32bits); Serial.print(F(", "));
+  Serial.print(varCaracter);  Serial.print(F(", "));
+  Serial.print(varEstado ? "true" : "false");  Serial.print(F(", "));
+  Serial.print(varValorFlotante);
+  Serial.println(varCharEnd);
+  Serial.println(F(" "));
+}
+
+void updateStruct() { // Función para actualizar el struct desde las variables independientes
+
+  // Asigna identificadores de origen, destino y tamaño.
+  dataEnvio.sourceID = mySlaveID; // El remitente es este dispositivo
+  dataEnvio.destinationID = toMasterID; // El destinatario es un Maestro específico
+  // dataEnvio.destinationID = broadcastID; // El destinatario es MultiDifusión)
+
+  dataEnvio.contador8bits = varContador8bits;
+  dataEnvio.contador16bits = varContador16bits;
+  dataEnvio.contador32bits = varContador32bits;
+  dataEnvio.caracter = varCaracter;
+  dataEnvio.estado = varEstado;
+  dataEnvio.valorFlotante = varValorFlotante;
+
+  dataEnvio.structSize = sizeof(dataEnvio); // Actualiza el campo structSize con el tamaño actual del struct
+
+  calcularChecksum(&dataEnvio); // Calcula y actualiza el checksum
+  calcularCRC(&dataEnvio);      // Calcula y actualiza el CRC
+}
+
+void updateVars() { // Función para actualizar las variables independientes desde el struct recibido
+  varContador8bits = dataRecibido.contador8bits;
+  varContador16bits = dataRecibido.contador16bits;
+  varContador32bits = dataRecibido.contador32bits;
+  varCaracter = dataRecibido.caracter;
+  varEstado = dataRecibido.estado;
+  varValorFlotante = dataRecibido.valorFlotante;
+}
+
 void sendSoftSerial() { // Enviar datos mediante SoftwareSerial
+
   if (millis() >= timeLine0 + intervalo) { // Comprueba si ha pasado el intervalo
+
     timeLine0 = millis(); // Actualiza el tiempo de referencia
+
     digitalWrite(LED_BUILTIN, HIGH); // Enciende el LED para indicar envío
 
-    // Asigna identificadores de origen y destino
-    dataEnvio.sourceID = mySlaveID; // El remitente es este dispositivo
-    dataEnvio.destinationID = toMasterID; // El destinatario es un Maestro específico
-    // dataEnvio.destinationID = broadcastID; // El destinatario es MultiDifusión)
-    dataEnvio.structSize = sizeof(dataEnvio); // Actualiza el campo structSize con el tamaño actual del struct
-    calcularChecksum(&dataEnvio); // Calcula y actualiza el checksum
-    calcularCRC(&dataEnvio);      // Calcula y actualiza el CRC
-    
+    updateStruct(); // Actualiza el struct con las variables antes de enviar
+
     softSerial.write(reinterpret_cast<uint8_t*>(&dataEnvio), sizeof(dataEnvio)); // Envía el struct como un bloque de bytes
 
-    // Imprime los datos enviados en varios formatos
-    Serial.println(F("Datos enviados:"));
-    Serial.print(F("Inicio: ")); Serial.print(dataEnvio.charInit); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.charInit, HEX); Serial.println(F(")"));
-    Serial.print(F("SourceID: ")); Serial.print(dataEnvio.sourceID); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.sourceID, HEX); Serial.println(F(")"));
-    Serial.print(F("DestinationID: ")); Serial.print(dataEnvio.destinationID); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.destinationID, HEX); Serial.println(F(")"));
-    Serial.print(F("8 bits: ")); Serial.print(dataEnvio.contador8bits); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.contador8bits, HEX); Serial.println(F(")"));
-    Serial.print(F("16 bits: ")); Serial.print(dataEnvio.contador16bits); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.contador16bits, HEX); Serial.println(F(")"));
-    Serial.print(F("32 bits: ")); Serial.print(dataEnvio.contador32bits); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.contador32bits, HEX); Serial.println(F(")"));
-    Serial.print(F("Caracter: ")); Serial.print(dataEnvio.caracter); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.caracter, HEX); Serial.println(F(")"));
-    Serial.print(F("Estado (bool): ")); Serial.print(dataEnvio.estado ? "true" : "false"); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.estado, HEX); Serial.println(F(")"));
-    Serial.print(F("Valor Flotante: ")); Serial.print(dataEnvio.valorFlotante); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.valorFlotante, HEX); Serial.println(F(")"));
-    Serial.print(F("Tamaño del paquete: ")); Serial.print(dataEnvio.structSize); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.structSize, HEX); Serial.println(F(")"));
-    Serial.print(F("CheckSum del paquete: ")); Serial.print(dataEnvio.checksum); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.checksum, HEX); Serial.println(F(")"));
-    Serial.print(F("CRC del paquete: ")); Serial.print(dataEnvio.crc); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.crc, HEX); Serial.println(F(")"));
-    Serial.print(F("Fin: ")); Serial.print(dataEnvio.charEnd); Serial.print(F(" (Hex: 0x")); Serial.print(dataEnvio.charEnd, HEX); Serial.println(F(")"));
-    Serial.println(F(" "));
+    printSending();
 
     // Incrementa los contadores con desbordamiento
-    dataEnvio.contador8bits++;
-    dataEnvio.contador16bits++;
-    dataEnvio.contador32bits++;
-    dataEnvio.caracter = (dataEnvio.caracter >= 'Z') ? 'A' : dataEnvio.caracter + 1; // Rota entre 'A' y 'Z'
-    dataEnvio.estado = !dataEnvio.estado; // Alterna el estado lógico
-    dataEnvio.valorFlotante += 0.01; // Incrementa ligeramente el valor flotante
+    varContador8bits++;
+    varContador16bits++;
+    varContador32bits++;
+    varCaracter = (dataEnvio.caracter >= 'Z') ? 'A' : dataEnvio.caracter + 1; // Rota entre 'A' y 'Z'
+    varEstado = !dataEnvio.estado; // Alterna el estado lógico
+    varValorFlotante += 0.01; // Incrementa ligeramente el valor flotante
 
     digitalWrite(LED_BUILTIN, LOW); // Apaga el LED tras el envío
   }
 }
 
 void readSoftSerial() { // Leer datos recibidos mediante SoftwareSerial
+
   if (softSerial.available() >= sizeof(dataRecibido)) { // Comprueba si hay suficientes datos para leer
 
     // Lee los bytes del SoftwareSerial al struct
     softSerial.readBytes(reinterpret_cast<uint8_t*>(&dataRecibido), sizeof(dataRecibido));
 
-    // Valida el checksum y el CRC 
+    // Valida el checksum y el CRC
     uint8_t checksumCalculado;
     uint16_t crcCalculado;
 
@@ -167,23 +236,11 @@ void readSoftSerial() { // Leer datos recibidos mediante SoftwareSerial
         (dataRecibido.checksum == checksumCalculado) && // Cuarta validación: calcular Checksum
         (dataRecibido.crc == crcCalculado) &&  // Quinta validación: calcular CRC
         (dataRecibido.destinationID == mySlaveID || dataRecibido.destinationID == broadcastID)) { // Sexta validación: Verificar el destinatario especifico o multidifusion
-    
-      // Imprime los datos recibidos en varios formatos
-      Serial.println(F("Datos recibidos:"));
-      Serial.print(F("Inicio: ")); Serial.print(dataRecibido.charInit); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.charInit, HEX); Serial.println(F(")"));
-      Serial.print(F("SourceID: ")); Serial.print(dataRecibido.sourceID);  Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.sourceID, HEX); Serial.println(F(")"));
-      Serial.print(F("DestinationID: ")); Serial.print(dataRecibido.destinationID); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.destinationID, HEX); Serial.println(F(")"));
-      Serial.print(F("8 bits: ")); Serial.print(dataRecibido.contador8bits); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.contador8bits, HEX); Serial.println(F(")"));
-      Serial.print(F("16 bits: ")); Serial.print(dataRecibido.contador16bits); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.contador16bits, HEX); Serial.println(F(")"));
-      Serial.print(F("32 bits: ")); Serial.print(dataRecibido.contador32bits); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.contador32bits, HEX); Serial.println(F(")"));
-      Serial.print(F("Caracter: ")); Serial.print(dataRecibido.caracter); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.caracter, HEX); Serial.println(F(")"));
-      Serial.print(F("Estado (bool): ")); Serial.print(dataRecibido.estado ? "true" : "false"); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.estado, HEX); Serial.println(F(")"));
-      Serial.print(F("Valor Flotante: ")); Serial.print(dataRecibido.valorFlotante); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.valorFlotante, HEX); Serial.println(F(")"));
-      Serial.print(F("Tamaño del paquete: ")); Serial.print(dataRecibido.structSize); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.structSize, HEX); Serial.println(F(")"));
-      Serial.print(F("CheckSum del paquete: ")); Serial.print(dataRecibido.checksum); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.checksum, HEX); Serial.println(F(")"));
-      Serial.print(F("CRC del paquete: ")); Serial.print(dataRecibido.crc); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.crc, HEX); Serial.println(F(")"));
-      Serial.print(F("Fin: ")); Serial.print(dataRecibido.charEnd); Serial.print(F(" (Hex: 0x")); Serial.print(dataRecibido.charEnd, HEX); Serial.println(F(")"));
-      Serial.println(F(" "));
+
+      printReceived();
+      updateVars(); // Actualiza las variables independientes después de recibir
+      printVarsInternal();
+
     } else { // Manejo de Errores.
       if (dataRecibido.charInit != '<') { // Error: Caracteres de control inválido
         Serial.println(F("Error: Caracteres de control inválidos."));
@@ -208,18 +265,21 @@ void readSoftSerial() { // Leer datos recibidos mediante SoftwareSerial
         Serial.println(F("Error: Checksum incorrecto."));
         Serial.print(F("Checksum Declarado Recibido: ")); Serial.println(dataRecibido.checksum);
         Serial.print(F("Checksum Calculado: ")); Serial.println(checksumCalculado);
+        Serial.println(F(" "));
       }
       if (dataRecibido.crc != crcCalculado) { // Error: CRC No Corresponde
         Serial.println(F("Error: CRC incorrecto."));
         Serial.print(F("CRC Declarado Recibido: ")); Serial.println(dataRecibido.crc);
         Serial.print(F("CRC Calculado: ")); Serial.println(crcCalculado);
+        Serial.println(F(" "));
       }
-      if (dataRecibido.destinationID != mySlaveID || 
-          dataRecibido.destinationID != toMasterID || 
-          dataRecibido.destinationID != broadcastID ||
+      if (dataRecibido.destinationID != mySlaveID &&
+          dataRecibido.destinationID != toMasterID &&
+          dataRecibido.destinationID != broadcastID &&
           dataRecibido.destinationID != targetID) { // Error: DispositivoID No Reconocido
         Serial.println(F("Error: El ID recibido no está en la lista de IDs válidos."));
         Serial.print(F("ID Recibido: ")); Serial.println(dataRecibido.destinationID);
+        Serial.println(F(" "));
       }
     }
   }

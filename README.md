@@ -18,8 +18,9 @@ _GRACIAS._
     - [x] Enviar y Recibir 1 Struct con mas cantidad de datos primitivos. [V-0.0.6](https://github.com/YoCharlyZ/softSerialComm/tree/14a7c725aa79f98a9d7cfd7cac1b5d1be97c1671)  
     - [x] Mejorar la Robustez y Fiabilidad de los Datos. [V-0.0.7](https://github.com/YoCharlyZ/softSerialComm/tree/b039c206649030fab34b0191d344d7698cd7c501)  
     - [x] Se Implementan Algoritmos para Calcular CheckSum y CRC. [V-0.0.8](https://github.com/YoCharlyZ/softSerialComm/tree/e851ccc7cf4776808f693cebe5f48562ee6db417)  
-    - [x] Se Implementa un Header con remitenteID, destinatarioID, multidifusionID. [V-0.0.9](https://github.com/YoCharlyZ/softSerialComm/tree/8218e0a5708d2e4f4d01e0c299a16fcbe6462d59)  
-    - [ ] Reservado. (evaluando posibles cambios y mejoras necesarias) [V-0.1.0]()  
+    - [x] Se Implementa un Header con remitenteID, destinatarioID, multidifusionID. [V-0.0.9](https://github.com/YoCharlyZ/softSerialComm/tree/c91d917d4d309e035c1601fa0055fcb9134862db)  
+    - [x] Se Extraen y Añaden los Datos como Variables Independientes Compartidas. [V-0.1.0]()  
+    - [ ] Reservado. (evaluando posibles cambios y mejoras necesarias) [V-0.1.1]()  
       
         
           

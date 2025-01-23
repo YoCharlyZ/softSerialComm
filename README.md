@@ -4,6 +4,9 @@ Comunicación Entre Placas de Arquitecturas Diferentes
 ###### <br> "a hombros de gigantes"  
 ###### <br>"la informacion que no es compartida en tiempo y forma, simplemente muere."  
 ###### <br>  
+Un Programa Bidireccional por emulacion UART  
+para comunicar dos placas de arquitecturas diferentes,  
+brindando un puente de control y monitorizacion de sus pines.
 ___________________________________________________________________  
 Diagrama de conexión:  
 Arduino Uno - - - - Level Shifter - - - - NodeMCU8266  

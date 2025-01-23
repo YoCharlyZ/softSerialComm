@@ -6,7 +6,7 @@ Comunicación Entre Placas de Arquitecturas Diferentes
 ###### <br>  
 Un Programa Bidireccional por emulacion UART  
 para comunicar dos placas de arquitecturas diferentes,  
-brindando un puente de control y monitorizacion de sus pines.
+brindando un puente de control y monitorizacion de sus pines.  
 ___________________________________________________________________  
 Diagrama de conexión:  
 Arduino Uno - - - - Level Shifter - - - - NodeMCU8266  
@@ -21,7 +21,7 @@ _GRACIAS._
 ___________________________________________________________________  
   + __Trabajando :__  
     - [ ] Reservado. (evaluando posibles cambios y mejoras necesarias) [V-0.1.2]()  
-    - [x] Se Reestrucctura el proyecto completo adecuandolo a los fines. [V-0.1.1]()  
+    - [x] Se Reestrucctura el proyecto completo adecuandolo a los fines. [V-0.1.1](https://github.com/YoCharlyZ/softSerialComm/tree/e1f18f836b039c99b9ebeb282bcce48a49676586)  
     - [x] Se Extraen y Añaden los Datos como Variables Independientes Compartidas. [V-0.1.0](https://github.com/YoCharlyZ/softSerialComm/tree/1887d0b892f3ad211064d3d358e6b1861913d55d)  
     - [x] Se Implementa un Header con remitenteID, destinatarioID, multidifusionID. [V-0.0.9](https://github.com/YoCharlyZ/softSerialComm/tree/c91d917d4d309e035c1601fa0055fcb9134862db)  
     - [x] Se Implementan Algoritmos para Calcular CheckSum y CRC. [V-0.0.8](https://github.com/YoCharlyZ/softSerialComm/tree/e851ccc7cf4776808f693cebe5f48562ee6db417)  

@@ -13,8 +13,8 @@ Arduino Uno - - - - Level Shifter - - - - NodeMCU8266
 (5V) <------------> ref Higth Voltage <-----------> Vin (5v.)  
 (3.3V) <-----------> ref Low Voltage <-----------> Vcc(3.3V)  
 (GND) <-----------------> GND <-------------------> (GND)  
-softTXpinD2 <---> HV1 <--| |--> LV1 <---> softRXgpi0(D3)  
-softRXpinD4 <---> HV3 <--| |--> LV3 <---> softTXgpi2(D4)  
+softTXpinD2 <---> HV1 <--| |--> LV1 <---> softRXgpio0(D3)  
+softRXpinD4 <---> HV3 <--| |--> LV3 <---> softTXgpio2(D4)  
 ___________________________________________________________________  
 _Son bienvenidos los Aportes, Colaboraciones, y Consejos._  
 _GRACIAS._  

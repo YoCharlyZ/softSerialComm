@@ -10,6 +10,10 @@ const uint8_t toMasterID = 8; // El adressID de al menos un Maestro Uno
 const uint8_t broadcastID = 255; // Un ID para MultiDifusion
 const unsigned long intervalo = 500; // Intervalo de tiempo en milisegundos
 unsigned long timeLine0 = 0; // Variable para controlar el tiempo
+uint16_t commSend = 0;  
+uint16_t commErr = 0;  
+uint16_t commOk = 0;  
+
 // Configuración del SoftwareSerial
 SoftwareSerial softSerial(softRX, softTX);
 
@@ -342,6 +346,12 @@ void sendSoftSerial() { // Enviar datos mediante SoftwareSerial
     rwDataPins(); // Lee y escribe correspondientemente los pines segun las variables globales
 
     digitalWrite(LED_BUILTIN, LOW); // Apaga el LED tras el envío
+
+    commSend++;
+    Serial.print(F("Envio N° : "));
+    Serial.println(commSend);
+    Serial.println(F(" "));
+
   }
 }
 void readSoftSerial() { // Leer datos recibidos mediante SoftwareSerial
@@ -372,7 +382,10 @@ void readSoftSerial() { // Leer datos recibidos mediante SoftwareSerial
       updateVars(); // Actualiza las variables independientes después de recibir
       printVarsInternal(); // Imprime los datos de las variables intenas
       rwDataPins(); // Lee y escribe correspondientemente los pines segun las variables globales
-
+      commOk++;
+      Serial.print(F("Comunicacion Correcta N° : "));
+      Serial.println(commOk);
+      Serial.println(F(" "));
     } else { // Manejo de Errores.
       if (dataRecibido.charInit != '<') { // Error: Caracteres de control inválido
         Serial.println(F("Error: Caracteres de control inválidos."));
@@ -413,6 +426,10 @@ void readSoftSerial() { // Leer datos recibidos mediante SoftwareSerial
         Serial.print(F("ID Recibido: ")); Serial.println(dataRecibido.destinationID);
         Serial.println(F(" "));
       }
+      commErr++;
+      Serial.print(F("Comunicacion Erronea N° : "));
+      Serial.println(commErr);
+      Serial.println(F(" "));
     }
   }
 }

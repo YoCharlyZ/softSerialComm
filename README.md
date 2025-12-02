@@ -23,7 +23,7 @@ _GRACIAS._
 ___________________________________________________________________  
   + __Trabajando :__  
     - [ ] Reservado. (evaluando posibles cambios y mejoras necesarias) [V-0.1.3]()  
-    - [x] Se Implementa, Maquina de Estados y Buffer FiFo Circular Doble. [V-0.1.2]()  
+    - [x] Se Implementa, Maquina de Estados y Buffer FiFo Circular Doble. [V-0.1.2](https://github.com/YoCharlyZ/softSerialComm/tree/5fec22abdf0df6faf1920335497d9f37900d6f18)  
     - [x] Se Reestrucctura el proyecto completo adecuandolo a los fines. [V-0.1.1](https://github.com/YoCharlyZ/softSerialComm/tree/87d0dcdc147cba6d6bb18bc3c74963ef7ce72394)  
     - [x] Se Extraen y Añaden los Datos como Variables Independientes Compartidas. [V-0.1.0](https://github.com/YoCharlyZ/softSerialComm/tree/1887d0b892f3ad211064d3d358e6b1861913d55d)  
     - [x] Se Implementa un Header con remitenteID, destinatarioID, multidifusionID. [V-0.0.9](https://github.com/YoCharlyZ/softSerialComm/tree/c91d917d4d309e035c1601fa0055fcb9134862db)  
